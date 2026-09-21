@@ -1,0 +1,213 @@
+<div class="sketch" data-hopf-fibration>
+  <div class="sketch__header">
+    <span>Hopf fibration</span>
+    <span class="sketch__math">S³ → S²</span>
+  </div>
+  <canvas class="sketch__canvas" aria-hidden="true"></canvas>
+  <div class="sketch__footer">
+    <span>Linked circles in ℝ³</span>
+    <span class="sketch__hint">Move to rotate</span>
+  </div>
+</div>
+
+<script>
+  type Point3 = [number, number, number];
+
+  interface ProjectedPoint {
+    x: number;
+    y: number;
+    z: number;
+    perspective: number;
+  }
+
+  interface Segment {
+    from: ProjectedPoint;
+    to: ProjectedPoint;
+    depth: number;
+    fiber: number;
+  }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-hopf-fibration]').forEach((sketch) => {
+    const canvas = sketch.querySelector<HTMLCanvasElement>('canvas');
+    const context = canvas?.getContext('2d');
+
+    if (!canvas || !context) return;
+
+    const fiberCount = 22;
+    const stepsPerFiber = 112;
+    const eta = Math.PI / 4;
+    const tau = Math.PI * 2;
+
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+    let animationFrame = 0;
+    let yaw = -1.18;
+    let pitch = -0.46;
+    let targetYaw = yaw;
+    let targetPitch = pitch;
+    let pointerActive = false;
+
+    const hopfPoint = (fiber: number, step: number): Point3 => {
+      const delta = (fiber / fiberCount) * tau;
+      const phase = (step / stepsPerFiber) * tau;
+
+      // A circle in S³: (z₁, z₂) = eⁱᵗ(cos(η)eⁱᵟ, sin(η)).
+      const w = Math.cos(eta) * Math.cos(phase + delta);
+      const x = Math.cos(eta) * Math.sin(phase + delta);
+      const y = Math.sin(eta) * Math.cos(phase);
+      const z = Math.sin(eta) * Math.sin(phase);
+
+      // Stereographic projection S³ \ {(1,0,0,0)} → ℝ³.
+      const denominator = 1 - w;
+      return [x / denominator, y / denominator, z / denominator];
+    };
+
+    const rotate = ([x, y, z]: Point3, currentYaw: number, currentPitch: number): Point3 => {
+      const cosYaw = Math.cos(currentYaw);
+      const sinYaw = Math.sin(currentYaw);
+      const cosPitch = Math.cos(currentPitch);
+      const sinPitch = Math.sin(currentPitch);
+
+      const yawX = x * cosYaw - z * sinYaw;
+      const yawZ = x * sinYaw + z * cosYaw;
+
+      return [yawX, y * cosPitch - yawZ * sinPitch, y * sinPitch + yawZ * cosPitch];
+    };
+
+    const project = (point: Point3): ProjectedPoint => {
+      const rotated = rotate(point, yaw, pitch);
+      const cameraDistance = 8.5;
+      const perspective = cameraDistance / (cameraDistance - rotated[2]);
+      const scale = Math.min(width, height) * 0.148;
+
+      return {
+        x: width * 0.5 + rotated[0] * scale * perspective,
+        y: height * 0.5 + rotated[1] * scale * perspective,
+        z: rotated[2],
+        perspective,
+      };
+    };
+
+    const drawGuide = () => {
+      const radius = Math.min(width, height) * 0.39;
+
+      context.save();
+      context.translate(width * 0.5, height * 0.5);
+      context.rotate(-0.16);
+      context.setLineDash([2, 7]);
+      context.lineWidth = 1;
+      context.strokeStyle = 'rgba(238, 242, 233, 0.09)';
+      context.beginPath();
+      context.ellipse(0, 0, radius, radius * 0.38, 0, 0, tau);
+      context.stroke();
+      context.restore();
+
+      context.setLineDash([]);
+    };
+
+    const draw = () => {
+      const time = frame / 60;
+
+      if (!pointerActive && !reduceMotion.matches) {
+        targetYaw = -1.18 + Math.sin(time * 0.18) * 0.22;
+        targetPitch = -0.46 + Math.cos(time * 0.14) * 0.13;
+      }
+
+      yaw += (targetYaw - yaw) * 0.055;
+      pitch += (targetPitch - pitch) * 0.055;
+
+      context.clearRect(0, 0, width, height);
+      drawGuide();
+
+      const segments: Segment[] = [];
+
+      for (let fiber = 0; fiber < fiberCount; fiber += 1) {
+        for (let step = 0; step < stepsPerFiber; step += 1) {
+          const from = project(hopfPoint(fiber, step));
+          const to = project(hopfPoint(fiber, (step + 1) % stepsPerFiber));
+          segments.push({
+            from,
+            to,
+            depth: (from.z + to.z) * 0.5,
+            fiber,
+          });
+        }
+      }
+
+      // Sorting every small arc gives the correct over/under structure at crossings.
+      segments.sort((a, b) => a.depth - b.depth);
+
+      context.lineCap = 'round';
+
+      segments.forEach((segment) => {
+        const depth = Math.max(0, Math.min(1, (segment.depth + 2.8) / 5.6));
+        const highlighted = segment.fiber === 3 || segment.fiber === 14;
+        const secondary = segment.fiber === 8 || segment.fiber === 19;
+        const alpha = (highlighted ? 0.62 : secondary ? 0.48 : 0.26) + depth * 0.36;
+
+        context.beginPath();
+        context.moveTo(segment.from.x, segment.from.y);
+        context.lineTo(segment.to.x, segment.to.y);
+        context.lineWidth =
+          (highlighted ? 2.05 : secondary ? 1.55 : 1.05) *
+          ((segment.from.perspective + segment.to.perspective) * 0.5);
+        context.strokeStyle = highlighted
+          ? `rgba(239, 128, 101, ${alpha})`
+          : secondary
+            ? `rgba(173, 221, 203, ${alpha})`
+            : `rgba(238, 242, 233, ${alpha})`;
+        context.stroke();
+      });
+
+      if (!reduceMotion.matches) {
+        frame += 1;
+        animationFrame = requestAnimationFrame(draw);
+      }
+    };
+
+    const resize = () => {
+      const bounds = canvas.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      width = bounds.width;
+      height = bounds.height;
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      draw();
+    };
+
+    const updatePointer = (event: PointerEvent) => {
+      const bounds = canvas.getBoundingClientRect();
+      const relativeX = (event.clientX - bounds.left) / bounds.width;
+      const relativeY = (event.clientY - bounds.top) / bounds.height;
+      targetYaw = -1.18 + (relativeX - 0.5) * 2.2;
+      targetPitch = -0.46 + (relativeY - 0.5) * 1.2;
+      pointerActive = true;
+
+      if (reduceMotion.matches) {
+        yaw = targetYaw;
+        pitch = targetPitch;
+        draw();
+      }
+    };
+
+    const releasePointer = () => {
+      pointerActive = false;
+    };
+
+    const restartAnimation = () => {
+      cancelAnimationFrame(animationFrame);
+      draw();
+    };
+
+    canvas.addEventListener('pointermove', updatePointer);
+    canvas.addEventListener('pointerleave', releasePointer);
+    reduceMotion.addEventListener('change', restartAnimation);
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas);
+  });
+</script>
