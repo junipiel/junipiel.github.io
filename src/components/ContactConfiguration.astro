@@ -1,14 +1,13 @@
 <div class="sketch" data-contact-configuration>
   <div class="sketch__header">
     <span>Rigid equal-sphere cluster</span>
-    <span class="sketch__math">‖xᵢ − xⱼ‖ = 2r</span>
   </div>
   <canvas
     class="sketch__canvas"
-    aria-label="An exact octahedral contact graph and its realization by six equal spheres. Drag to rotate, or use the arrow keys."
+    aria-label="A contact graph and a valid realization by seven equal spheres. Drag to rotate, or use the arrow keys."
     tabindex="0"
   >
-    An exact octahedral contact graph and its realization by six equal spheres.
+    A contact graph and a valid realization by seven equal spheres.
   </canvas>
   <div class="sketch__footer sketch__footer--controls">
     <label class="sketch__mode">
@@ -16,7 +15,7 @@
       <input type="range" min="0" max="100" value="0" aria-label="Blend between contact graph and sphere realization" />
       <span>Realization</span>
     </label>
-    <span class="sketch__count">N = 6 · |E| = 12</span>
+    <span class="sketch__count">N = 7 · |E| = 15</span>
   </div>
 </div>
 
@@ -45,23 +44,32 @@
 
     if (!canvas || !slider || !context) return;
 
-    // Six unit spheres at the vertices of a regular octahedron.
-    // Every non-antipodal pair of centres is exactly distance 2 apart.
-    const root = Math.SQRT2;
-    const points: Point3[] = [
-      [root, 0, 0],
-      [-root, 0, 0],
-      [0, root, 0],
-      [0, -root, 0],
-      [0, 0, root],
-      [0, 0, -root],
+    // A reference-free solver realization from the thesis project (N=7).
+    // The original solver uses contact distance 1; the coordinates are scaled
+    // here so unit spheres touch at centre distance 2, then centred for display.
+    const solverPoints: Point3[] = [
+      [0, 0, 0],
+      [2.1851851851905634, 1.389917314721812, 3.024061410849339],
+      [1.1111111110952196, 2.5660011964043404, 1.8144368465104752],
+      [2, 0, 0],
+      [2.6666666666832208, 1.5396007178485566, 1.0886621079106426],
+      [1, 1.7320508075688772, 0],
+      [1, 0.577350269189625, 1.6329931618554556],
     ];
+    const centroid: Point3 = solverPoints
+      .reduce<Point3>((sum, point) => [sum[0] + point[0], sum[1] + point[1], sum[2] + point[2]], [0, 0, 0])
+      .map((value) => value / solverPoints.length) as Point3;
+    const points: Point3[] = solverPoints.map((point) => [
+      point[0] - centroid[0],
+      point[1] - centroid[1],
+      point[2] - centroid[2],
+    ]);
 
     const contacts = points.flatMap((from, fromIndex) =>
       points.slice(fromIndex + 1).flatMap((to, offset) => {
         const toIndex = fromIndex + offset + 1;
         const distance = Math.hypot(from[0] - to[0], from[1] - to[1], from[2] - to[2]);
-        return Math.abs(distance - 2) < 1e-12 ? [{ from: fromIndex, to: toIndex, depth: 0 }] : [];
+        return Math.abs(distance - 2) < 1e-7 ? [{ from: fromIndex, to: toIndex, depth: 0 }] : [];
       }),
     );
 
@@ -69,8 +77,8 @@
     let width = 0;
     let height = 0;
     let animationFrame = 0;
-    let yaw = -0.72;
-    let pitch = -0.38;
+    let yaw = -0.6;
+    let pitch = -0.28;
     let velocityYaw = 0;
     let velocityPitch = 0;
     let lastPointerX = 0;
@@ -152,7 +160,7 @@
       context.clearRect(0, 0, width, height);
       drawBackground();
 
-      const scale = Math.min(width, height) * 0.19;
+      const scale = Math.min(width, height) * 0.145;
       projected = points.map((point, index) => project(point, index, scale));
       const nodeRadius = Math.min(width, height) * 0.017;
       // At currentMix = 1, this is the same scale used for a unit
@@ -236,7 +244,7 @@
         .find(
           (point) =>
             Math.hypot(x - point.x, y - point.y) <=
-            Math.max(12, Math.min(width, height) * 0.19 * currentMix),
+            Math.max(12, Math.min(width, height) * 0.145 * currentMix),
         )?.index ?? -1;
 
     const startDrag = (event: PointerEvent) => {

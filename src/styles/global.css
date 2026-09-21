@@ -80,27 +80,16 @@ a:focus-visible {
   border-bottom: 1px solid var(--line);
 }
 
-.wordmark {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.7rem;
-  font-weight: 680;
-  letter-spacing: -0.02em;
+.site-name {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 620;
+  letter-spacing: -0.01em;
   text-decoration: none;
 }
 
-.wordmark__mark {
-  display: grid;
-  width: 2rem;
-  height: 2rem;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--paper);
-  background: var(--green);
-  font-family: var(--serif);
-  font-size: 1.25rem;
-  font-style: italic;
-  line-height: 1;
+.site-name:hover {
+  color: var(--ink);
 }
 
 .site-nav {
@@ -260,10 +249,6 @@ h1 {
 
 .sketch__header {
   border-bottom: 1px solid rgba(238, 242, 233, 0.15);
-}
-
-.sketch__math {
-  flex-shrink: 0;
 }
 
 .sketch__footer {
@@ -474,43 +459,31 @@ h1 {
   padding-bottom: clamp(6rem, 12vw, 11rem);
 }
 
-.large-link {
-  display: grid;
-  grid-template-columns: 1fr auto auto;
-  gap: 1rem;
+.profile-link {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
   margin-top: 2.5rem;
-  padding-block: 1.4rem;
+  padding-block: 1.15rem;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
-  font-family: var(--serif);
-  font-size: clamp(1.35rem, 2.7vw, 2.2rem);
   text-decoration: none;
 }
 
-.large-link__handle {
+.profile-link__label {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+}
+
+.profile-link__url {
   color: var(--ink-soft);
-  font-family: var(--sans);
-  font-size: 0.9rem;
+  font-size: 0.86rem;
+  transition: color 160ms ease;
 }
 
-.large-link__arrow {
-  display: inline-grid;
-  width: 2.4rem;
-  height: 2.4rem;
-  place-items: center;
-  border-radius: 50%;
-  background: var(--green-light);
-  transition:
-    color 160ms ease,
-    background 160ms ease,
-    transform 160ms ease;
-}
-
-.large-link:hover .large-link__arrow {
-  color: var(--paper);
-  background: var(--green);
-  transform: translate(2px, -2px);
+.profile-link:hover .profile-link__url {
+  color: var(--ink);
 }
 
 .site-footer {
@@ -617,14 +590,6 @@ h1 {
   .roadmap li {
     grid-template-columns: 1fr;
     gap: 0.4rem;
-  }
-
-  .large-link {
-    grid-template-columns: 1fr auto;
-  }
-
-  .large-link__handle {
-    display: none;
   }
 
   .site-footer {
