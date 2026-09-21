@@ -1,10 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HopfFibration from '../components/HopfFibration.astro';
+import ContactConfiguration from '../components/ContactConfiguration.astro';
 
 const year = new Date().getFullYear();
 const description =
-  'Julian Pielmaier — currently working on a master’s thesis at the Max Planck Institute for Mathematics in the Sciences.';
+  'Personal website of Julian Pielmaier — computer science, machine learning, graphs, time series, and current research.';
 ---
 
 <BaseLayout title="Julian Pielmaier — junipiel" description={description}>
@@ -17,7 +17,8 @@ const description =
     </a>
 
     <nav class="site-nav" aria-label="Main navigation">
-      <a href="#current">Current</a>
+      <a href="#current">Now</a>
+      <a href="#interests">Interests</a>
       <a href="https://github.com/junipiel" rel="me noreferrer">GitHub <span aria-hidden="true">↗</span></a>
     </nav>
   </header>
@@ -27,19 +28,21 @@ const description =
       <div class="hero__copy">
         <h1 id="hero-title">Hi, I’m Julian.</h1>
         <p class="hero__text hero__text--primary">
-          I’m currently working on my master’s thesis at the Max Planck Institute for Mathematics in the
-          Sciences in Leipzig.
+          I came into machine learning through the engineering side of computer science. Building systems is
+          still part of what I enjoy, but over time I’ve moved closer to research: the “why” behind a method is
+          usually what keeps me thinking.
         </p>
         <p class="hero__text">
-          I’m interested in mathematics, code, and small interactive experiments that make abstract ideas
-          easier to explore.
+          My work keeps circling back to structured data—relations in graphs, change in time series, and the
+          models that try to make sense of both.
         </p>
 
         <div class="wip-note">
           <span class="wip-note__label">Work in progress</span>
           <p>
-            This site is still taking shape. I want it to become a place for research notes, projects, and
-            interactive things I build along the way.
+            This is the first small version of this site. I’m building it into a personal notebook for ongoing
+            work, projects, technical notes, and interactive experiments. A few things are deliberately still
+            unfinished.
           </p>
         </div>
 
@@ -47,14 +50,14 @@ const description =
           <a class="button button--primary" href="https://github.com/junipiel" rel="me noreferrer">
             GitHub <span aria-hidden="true">↗</span>
           </a>
-          <a class="button button--quiet" href="https://www.mis.mpg.de/" rel="noreferrer">
-            MPI MiS <span aria-hidden="true">↗</span>
+          <a class="button button--quiet" href="#current">
+            What I’m working on <span aria-hidden="true">↓</span>
           </a>
         </div>
       </div>
 
       <div class="hero__visual">
-        <HopfFibration />
+        <ContactConfiguration />
       </div>
     </section>
 
@@ -62,53 +65,90 @@ const description =
       <div class="section__label" aria-hidden="true">01 / Now</div>
       <div class="section__content">
         <h2 id="current-title">What I’m working on</h2>
+        <p class="section__lead">
+          At the moment I split my time between my master’s thesis and my work as a research assistant.
+        </p>
 
-        <div class="facts">
-          <div class="fact">
-            <span class="fact__label">Current project</span>
-            <span>Master’s thesis</span>
-          </div>
-          <div class="fact">
-            <span class="fact__label">Institution</span>
-            <a href="https://www.mis.mpg.de/" rel="noreferrer">
-              Max Planck Institute for Mathematics in the Sciences <span aria-hidden="true">↗</span>
-            </a>
-          </div>
-          <div class="fact">
-            <span class="fact__label">Location</span>
-            <span>Leipzig, Germany</span>
-          </div>
-          <div class="fact">
-            <span class="fact__label">Details</span>
-            <span>Work in progress</span>
-          </div>
+        <div class="work-list">
+          <article class="work-item">
+            <div class="work-item__meta">Master’s thesis · ongoing</div>
+            <h3>From contact graphs to sphere configurations</h3>
+            <p>
+              Given a combinatorial contact graph, how can we construct a valid 3D arrangement of equal
+              spheres? I’m comparing classical geometric methods with learned models and hybrid solver
+              pipelines. What interests me most is what relational information the models learn, why their
+              predictions make useful solver starts, and when learning actually adds something.
+            </p>
+            <p class="work-item__context">
+              For this thesis, I’m a visiting researcher at MPI MiS in Leipzig.
+            </p>
+          </article>
+
+          <article class="work-item work-item--compact">
+            <div class="work-item__meta">Research assistant · ongoing</div>
+            <h3>Project KORALLE</h3>
+            <p>
+              Alongside my thesis, I work as a research assistant at InfAI on the KORALLE project.
+            </p>
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="section" aria-labelledby="direction-title">
-      <div class="section__label" aria-hidden="true">02 / This site</div>
+    <section class="section" id="interests" aria-labelledby="interests-title">
+      <div class="section__label" aria-hidden="true">02 / Interests</div>
       <div class="section__content">
-        <h2 id="direction-title">Where this is heading</h2>
+        <h2 id="interests-title">Questions I keep coming back to</h2>
         <p class="section__lead">
-          I’d like this page to become a small, informal record of what I’m learning and building. These are
-          the parts I plan to add next.
+          The common thread is structure and explanation: how relationships and temporal patterns can be
+          represented, what models extract from them, and where learned methods genuinely improve on strong
+          classical approaches.
+        </p>
+
+        <ul class="threads">
+          <li>
+            <span class="threads__title">Relations</span>
+            <span>Graphs, relational representations, and the geometry hidden in connections.</span>
+          </li>
+          <li>
+            <span class="threads__title">Dynamics</span>
+            <span>Time series, streaming data, and systems that change over time.</span>
+          </li>
+          <li>
+            <span class="threads__title">Learning</span>
+            <span>Machine learning for structured problems, often together with classical algorithms.</span>
+          </li>
+          <li>
+            <span class="threads__title">Understanding</span>
+            <span>Why a model works, what it has learned, and when it fails.</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="direction-title">
+      <div class="section__label" aria-hidden="true">03 / This site</div>
+      <div class="section__content">
+        <h2 id="direction-title">Still taking shape</h2>
+        <p class="section__lead">
+          I want this to become a useful record of the things I’m learning and building—not a polished list
+          of claims. The next pieces will appear as they become worth sharing.
         </p>
 
         <ul class="roadmap">
           <li>
-            <span class="roadmap__title">Research notes</span>
-            <span>Background, references, and notes related to my work.</span>
+            <span class="roadmap__title">Project pages</span>
+            <span>Code, results, dead ends, and enough context to make them useful.</span>
             <span class="roadmap__status">In progress</span>
           </li>
           <li>
-            <span class="roadmap__title">Code & projects</span>
-            <span>Selected repositories with a little more context than a README.</span>
+            <span class="roadmap__title">Notes</span>
+            <span>Working notes on graphs, time series, geometry, and model behaviour.</span>
             <span class="roadmap__status">In progress</span>
           </li>
           <li>
-            <span class="roadmap__title">Mathematical demos</span>
-            <span>Small interactive ways to explore geometric and mathematical ideas.</span>
+            <span class="roadmap__title">Experiments</span>
+            <span>Small interactive demos tied to questions I’m actually working on.</span>
             <span class="roadmap__status">In progress</span>
           </li>
         </ul>
@@ -116,7 +156,7 @@ const description =
     </section>
 
     <section class="section section--last" aria-labelledby="elsewhere-title">
-      <div class="section__label" aria-hidden="true">03 / Links</div>
+      <div class="section__label" aria-hidden="true">04 / Links</div>
       <div class="section__content">
         <h2 id="elsewhere-title">Links</h2>
         <a class="large-link" href="https://github.com/junipiel" rel="me noreferrer">

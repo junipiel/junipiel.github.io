@@ -1,0 +1,296 @@
+<div class="sketch" data-contact-configuration>
+  <div class="sketch__header">
+    <span>Contact graph → 3D configuration</span>
+    <span class="sketch__math">G → X ⊂ ℝ³</span>
+  </div>
+  <canvas
+    class="sketch__canvas"
+    aria-label="Interactive contact graph and equal-sphere configuration. Drag to rotate, or use the arrow keys."
+    tabindex="0"
+  >
+    An interactive contact graph and equal-sphere configuration.
+  </canvas>
+  <div class="sketch__footer sketch__footer--controls">
+    <label class="sketch__mode">
+      <span>Graph</span>
+      <input type="range" min="0" max="100" value="68" aria-label="Blend between contact graph and sphere geometry" />
+      <span>Geometry</span>
+    </label>
+    <span class="sketch__count">13 spheres · 36 contacts</span>
+  </div>
+</div>
+
+<script>
+  type Point3 = [number, number, number];
+
+  interface ProjectedPoint {
+    x: number;
+    y: number;
+    z: number;
+    perspective: number;
+    index: number;
+  }
+
+  interface Contact {
+    from: number;
+    to: number;
+    depth: number;
+  }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  document.querySelectorAll<HTMLElement>('[data-contact-configuration]').forEach((sketch) => {
+    const canvas = sketch.querySelector<HTMLCanvasElement>('canvas');
+    const slider = sketch.querySelector<HTMLInputElement>('input[type="range"]');
+    const context = canvas?.getContext('2d');
+
+    if (!canvas || !slider || !context) return;
+
+    const root = Math.SQRT2;
+    const points: Point3[] = [
+      [0, 0, 0],
+      [root, root, 0],
+      [root, -root, 0],
+      [-root, root, 0],
+      [-root, -root, 0],
+      [root, 0, root],
+      [root, 0, -root],
+      [-root, 0, root],
+      [-root, 0, -root],
+      [0, root, root],
+      [0, root, -root],
+      [0, -root, root],
+      [0, -root, -root],
+    ];
+
+    const contacts = points.flatMap((from, fromIndex) =>
+      points.slice(fromIndex + 1).flatMap((to, offset) => {
+        const toIndex = fromIndex + offset + 1;
+        const distance = Math.hypot(from[0] - to[0], from[1] - to[1], from[2] - to[2]);
+        return Math.abs(distance - 2) < 0.001 ? [{ from: fromIndex, to: toIndex, depth: 0 }] : [];
+      }),
+    );
+
+    let width = 0;
+    let height = 0;
+    let animationFrame = 0;
+    let yaw = -0.72;
+    let pitch = -0.38;
+    let velocityYaw = 0;
+    let velocityPitch = 0;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    let isDragging = false;
+    let hoveredSphere = -1;
+    let projected: ProjectedPoint[] = [];
+
+    const geometryMix = () => Number(slider.value) / 100;
+
+    const rotate = ([x, y, z]: Point3): Point3 => {
+      const cosYaw = Math.cos(yaw);
+      const sinYaw = Math.sin(yaw);
+      const cosPitch = Math.cos(pitch);
+      const sinPitch = Math.sin(pitch);
+
+      const yawX = x * cosYaw - z * sinYaw;
+      const yawZ = x * sinYaw + z * cosYaw;
+
+      return [yawX, y * cosPitch - yawZ * sinPitch, y * sinPitch + yawZ * cosPitch];
+    };
+
+    const project = (point: Point3, index: number): ProjectedPoint => {
+      const rotated = rotate(point);
+      const cameraDistance = 8;
+      const perspective = cameraDistance / (cameraDistance - rotated[2]);
+      const scale = Math.min(width, height) * 0.12;
+
+      return {
+        x: width * 0.5 + rotated[0] * scale * perspective,
+        y: height * 0.5 + rotated[1] * scale * perspective,
+        z: rotated[2],
+        perspective,
+        index,
+      };
+    };
+
+    const drawBackground = () => {
+      const radius = Math.min(width, height) * 0.36;
+
+      context.save();
+      context.translate(width * 0.5, height * 0.5);
+      context.rotate(-0.13);
+      context.setLineDash([2, 8]);
+      context.lineWidth = 1;
+      context.strokeStyle = 'rgba(238, 242, 233, 0.09)';
+      context.beginPath();
+      context.ellipse(0, 0, radius, radius * 0.34, 0, 0, Math.PI * 2);
+      context.stroke();
+      context.restore();
+      context.setLineDash([]);
+    };
+
+    const draw = () => {
+      if (!reduceMotion.matches && !isDragging) {
+        yaw += 0.0017 + velocityYaw;
+        pitch += velocityPitch;
+        velocityYaw *= 0.92;
+        velocityPitch *= 0.88;
+      }
+
+      context.clearRect(0, 0, width, height);
+      drawBackground();
+
+      projected = points.map(project);
+      const mix = geometryMix();
+      const sphereRadius = Math.min(width, height) * (0.016 + mix * 0.103);
+      const sortedContacts: Contact[] = contacts
+        .map((contact) => ({
+          ...contact,
+          depth: (projected[contact.from].z + projected[contact.to].z) * 0.5,
+        }))
+        .sort((a, b) => a.depth - b.depth);
+
+      context.lineCap = 'round';
+      sortedContacts.forEach((contact) => {
+        const from = projected[contact.from];
+        const to = projected[contact.to];
+        const active = hoveredSphere === contact.from || hoveredSphere === contact.to;
+        const depth = Math.max(0, Math.min(1, (contact.depth + 2) / 4));
+
+        context.beginPath();
+        context.moveTo(from.x, from.y);
+        context.lineTo(to.x, to.y);
+        context.lineWidth = active ? 2.25 : 0.9 + (1 - mix) * 0.7;
+        context.strokeStyle = active
+          ? 'rgba(239, 128, 101, 0.92)'
+          : `rgba(238, 242, 233, ${0.18 + (1 - mix) * 0.43 + depth * 0.12})`;
+        context.stroke();
+      });
+
+      [...projected]
+        .sort((a, b) => a.z - b.z)
+        .forEach((point) => {
+          const radius = sphereRadius * point.perspective;
+          const active = point.index === hoveredSphere;
+          const isCentre = point.index === 0;
+          const lightX = point.x - radius * 0.34;
+          const lightY = point.y - radius * 0.38;
+          const gradient = context.createRadialGradient(lightX, lightY, radius * 0.06, point.x, point.y, radius);
+
+          if (active) {
+            gradient.addColorStop(0, '#ffd9ca');
+            gradient.addColorStop(0.58, '#ef8065');
+            gradient.addColorStop(1, '#9b3d2c');
+          } else if (isCentre) {
+            gradient.addColorStop(0, '#f9b69f');
+            gradient.addColorStop(0.6, '#df735b');
+            gradient.addColorStop(1, '#8d3528');
+          } else {
+            gradient.addColorStop(0, '#ffffff');
+            gradient.addColorStop(0.52, '#e4eee6');
+            gradient.addColorStop(1, '#8ba397');
+          }
+
+          context.beginPath();
+          context.arc(point.x, point.y, radius, 0, Math.PI * 2);
+          context.fillStyle = gradient;
+          context.globalAlpha = 0.78 + mix * 0.22;
+          context.fill();
+          context.globalAlpha = 1;
+          context.lineWidth = active ? 2 : 0.8;
+          context.strokeStyle = active ? '#ffd5c7' : 'rgba(238, 242, 233, 0.42)';
+          context.stroke();
+        });
+
+      if (!reduceMotion.matches) {
+        animationFrame = requestAnimationFrame(draw);
+      }
+    };
+
+    const resize = () => {
+      const bounds = canvas.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      width = bounds.width;
+      height = bounds.height;
+      canvas.width = Math.round(width * ratio);
+      canvas.height = Math.round(height * ratio);
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+      draw();
+    };
+
+    const sphereAt = (x: number, y: number) => {
+      const mix = geometryMix();
+      const radius = Math.min(width, height) * (0.016 + mix * 0.103);
+      return [...projected]
+        .sort((a, b) => b.z - a.z)
+        .find((point) => Math.hypot(x - point.x, y - point.y) <= Math.max(12, radius * point.perspective))?.index ?? -1;
+    };
+
+    const startDrag = (event: PointerEvent) => {
+      isDragging = true;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      velocityYaw = 0;
+      velocityPitch = 0;
+      canvas.setPointerCapture(event.pointerId);
+      sketch.classList.add('is-dragging');
+    };
+
+    const updatePointer = (event: PointerEvent) => {
+      const bounds = canvas.getBoundingClientRect();
+
+      if (isDragging) {
+        const deltaX = event.clientX - lastPointerX;
+        const deltaY = event.clientY - lastPointerY;
+        yaw += deltaX * 0.0085;
+        pitch = Math.max(-1.25, Math.min(1.25, pitch + deltaY * 0.0085));
+        velocityYaw = deltaX * 0.0011;
+        velocityPitch = deltaY * 0.0009;
+        lastPointerX = event.clientX;
+        lastPointerY = event.clientY;
+        hoveredSphere = -1;
+      } else {
+        hoveredSphere = sphereAt(event.clientX - bounds.left, event.clientY - bounds.top);
+      }
+
+      if (reduceMotion.matches) draw();
+    };
+
+    const endDrag = (event: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+      sketch.classList.remove('is-dragging');
+    };
+
+    const restartAnimation = () => {
+      cancelAnimationFrame(animationFrame);
+      draw();
+    };
+
+    canvas.addEventListener('pointerdown', startDrag);
+    canvas.addEventListener('pointermove', updatePointer);
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('pointerleave', () => {
+      if (!isDragging) hoveredSphere = -1;
+    });
+    canvas.addEventListener('keydown', (event) => {
+      const step = 0.1;
+      if (event.key === 'ArrowLeft') yaw -= step;
+      else if (event.key === 'ArrowRight') yaw += step;
+      else if (event.key === 'ArrowUp') pitch = Math.max(-1.25, pitch - step);
+      else if (event.key === 'ArrowDown') pitch = Math.min(1.25, pitch + step);
+      else return;
+      event.preventDefault();
+      if (reduceMotion.matches) draw();
+    });
+    slider.addEventListener('input', () => {
+      if (reduceMotion.matches) draw();
+    });
+    reduceMotion.addEventListener('change', restartAnimation);
+
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas);
+  });
+</script>

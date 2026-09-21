@@ -271,11 +271,41 @@ h1 {
   width: 100%;
   height: 23.4rem;
   cursor: grab;
+  outline: none;
   touch-action: none;
+}
+
+.sketch__canvas:focus-visible {
+  box-shadow: inset 0 0 0 3px var(--coral);
 }
 
 .sketch.is-dragging .sketch__canvas {
   cursor: grabbing;
+}
+
+.sketch__footer--controls {
+  gap: 1rem;
+}
+
+.sketch__mode {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 0.7rem;
+  max-width: 14.5rem;
+}
+
+.sketch__mode input {
+  width: 100%;
+  height: 1.2rem;
+  margin: 0;
+  accent-color: var(--coral);
+  cursor: ew-resize;
+}
+
+.sketch__mode input:focus-visible {
+  outline: 2px solid var(--coral);
+  outline-offset: 3px;
 }
 
 .section {
@@ -340,6 +370,70 @@ h1 {
   font-weight: 650;
   letter-spacing: 0.09em;
   text-transform: uppercase;
+}
+
+.work-list {
+  margin-top: 2.8rem;
+  border-top: 1px solid var(--line);
+}
+
+.work-item {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.3fr) minmax(0, 1fr);
+  column-gap: 2rem;
+  padding-block: 2rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.work-item__meta {
+  grid-row: 1 / span 3;
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.work-item h3 {
+  margin-bottom: 0.8rem;
+  font-family: var(--serif);
+  font-size: clamp(1.45rem, 2.6vw, 2.05rem);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+}
+
+.work-item p {
+  max-width: 42rem;
+  margin-bottom: 0;
+  color: var(--ink-soft);
+}
+
+.work-item__context {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.threads {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+  list-style: none;
+}
+
+.threads li {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.3fr) 1fr;
+  gap: 1.5rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.threads__title {
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 1.15rem;
 }
 
 .roadmap {
@@ -472,6 +566,10 @@ h1 {
     display: none;
   }
 
+  .site-nav a:nth-child(2) {
+    display: none;
+  }
+
   .hero {
     padding-block: 3.7rem 5.5rem;
   }
@@ -484,6 +582,14 @@ h1 {
     display: none;
   }
 
+  .sketch__count {
+    display: none;
+  }
+
+  .sketch__mode {
+    max-width: none;
+  }
+
   .section {
     grid-template-columns: 1fr;
     gap: 1.4rem;
@@ -492,6 +598,16 @@ h1 {
   .fact {
     grid-template-columns: 1fr;
     gap: 0.35rem;
+  }
+
+  .work-item,
+  .threads li {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+
+  .work-item__meta {
+    grid-row: auto;
   }
 
   .roadmap li {
