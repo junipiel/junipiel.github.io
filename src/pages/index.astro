@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import OrbitSketch from '../components/OrbitSketch.astro';
+
+const year = new Date().getFullYear();
+const description =
+  'Julian Pielmaier — currently working on a master’s thesis at the Max Planck Institute for Mathematics in the Sciences.';
+---
+
+<BaseLayout title="Julian Pielmaier — junipiel" description={description}>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="site-header">
+    <a class="wordmark" href="/" aria-label="junipiel home">
+      <span class="wordmark__mark" aria-hidden="true">j</span>
+      <span>junipiel</span>
+    </a>
+
+    <nav class="site-nav" aria-label="Main navigation">
+      <a href="#now">Now</a>
+      <a href="https://github.com/junipiel" rel="me noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero__copy">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Leipzig, Germany</p>
+        <h1 id="hero-title">Research, code,<br /><em>and ideas in motion.</em></h1>
+        <p class="hero__intro">Hi, I’m Julian Pielmaier.</p>
+        <p class="hero__text">
+          I’m currently working on my master’s thesis at the Max Planck Institute for Mathematics in the
+          Sciences in Leipzig.
+        </p>
+
+        <div class="hero__actions">
+          <a class="button button--primary" href="https://github.com/junipiel" rel="me noreferrer">
+            View GitHub <span aria-hidden="true">↗</span>
+          </a>
+          <a class="button button--quiet" href="https://www.mis.mpg.de/" rel="noreferrer">
+            MPI MiS <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="hero__visual">
+        <OrbitSketch />
+      </div>
+    </section>
+
+    <section class="section" id="now" aria-labelledby="now-title">
+      <div class="section__label" aria-hidden="true">01 / Now</div>
+      <div class="section__content">
+        <h2 id="now-title">A place for work in progress.</h2>
+        <p class="section__lead">
+          This site will grow into a home for research notes, software, and interactive experiments. For now,
+          here is the short version.
+        </p>
+
+        <div class="cards">
+          <article class="card">
+            <p class="card__meta"><span class="status-dot"></span> Current</p>
+            <h3>Master’s thesis</h3>
+            <p>Max Planck Institute for Mathematics in the Sciences</p>
+          </article>
+
+          <article class="card card--muted">
+            <p class="card__meta">Up next</p>
+            <h3>Research & projects</h3>
+            <p>Work in progress.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section--last" aria-labelledby="elsewhere-title">
+      <div class="section__label" aria-hidden="true">02 / Elsewhere</div>
+      <div class="section__content">
+        <h2 id="elsewhere-title">Find me online.</h2>
+        <a class="large-link" href="https://github.com/junipiel" rel="me noreferrer">
+          <span>GitHub</span>
+          <span class="large-link__handle">@junipiel</span>
+          <span class="large-link__arrow" aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span>© {year} Julian Pielmaier</span>
+    <span>junipiel.com</span>
+  </footer>
+</BaseLayout>
