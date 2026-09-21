@@ -4,10 +4,10 @@ import ContactConfiguration from '../components/ContactConfiguration.astro';
 
 const year = new Date().getFullYear();
 const description =
-  'Personal website of Julian Pielmaier — computer science, machine learning, graphs, time series, and current research.';
+  'Personal website of Julian Pielmaier: computer science, machine learning, graphs, time series, and current research.';
 ---
 
-<BaseLayout title="Julian Pielmaier — junipiel" description={description}>
+<BaseLayout title="Julian Pielmaier | junipiel" description={description}>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
@@ -28,21 +28,20 @@ const description =
       <div class="hero__copy">
         <h1 id="hero-title">Hi, I’m Julian.</h1>
         <p class="hero__text hero__text--primary">
-          I came into machine learning through the engineering side of computer science. Building systems is
-          still part of what I enjoy, but over time I’ve moved closer to research: the “why” behind a method is
-          usually what keeps me thinking.
+          I study computer science and work on machine learning. I started out mostly on the engineering side,
+          building systems and pipelines. Over time, I became more interested in the research questions behind
+          them: why a method works, what information it uses, and where it fails.
         </p>
         <p class="hero__text">
-          My work keeps circling back to structured data—relations in graphs, change in time series, and the
-          models that try to make sense of both.
+          I’m especially interested in graphs, time series, geometric deep learning, and methods that combine
+          learning with classical algorithms.
         </p>
 
         <div class="wip-note">
           <span class="wip-note__label">Work in progress</span>
           <p>
-            This is the first small version of this site. I’m building it into a personal notebook for ongoing
-            work, projects, technical notes, and interactive experiments. A few things are deliberately still
-            unfinished.
+            This is an early version of my site. I plan to add project pages, notes, and a few interactive
+            examples. Some sections are still missing.
           </p>
         </div>
 
@@ -51,7 +50,7 @@ const description =
             GitHub <span aria-hidden="true">↗</span>
           </a>
           <a class="button button--quiet" href="#current">
-            What I’m working on <span aria-hidden="true">↓</span>
+            Current work <span aria-hidden="true">↓</span>
           </a>
         </div>
       </div>
@@ -66,21 +65,22 @@ const description =
       <div class="section__content">
         <h2 id="current-title">What I’m working on</h2>
         <p class="section__lead">
-          At the moment I split my time between my master’s thesis and my work as a research assistant.
+          Right now, I am working on my master’s thesis and, in parallel, as a research assistant at InfAI.
         </p>
 
         <div class="work-list">
           <article class="work-item">
             <div class="work-item__meta">Master’s thesis · ongoing</div>
-            <h3>From contact graphs to sphere configurations</h3>
+            <h3>Rigid sphere packings from contact graphs</h3>
             <p>
-              Given a combinatorial contact graph, how can we construct a valid 3D arrangement of equal
-              spheres? I’m comparing classical geometric methods with learned models and hybrid solver
-              pipelines. What interests me most is what relational information the models learn, why their
-              predictions make useful solver starts, and when learning actually adds something.
+              My thesis uses the rigid equal-sphere clusters enumerated by Miranda Holmes-Cerfon. Starting from
+              a contact graph, I look for a valid three-dimensional realization and compare classical methods
+              with learned models that provide initializations for a local solver. I want to understand what
+              geometric information the models learn and when they improve on strong classical baselines.
             </p>
             <p class="work-item__context">
-              For this thesis, I’m a visiting researcher at MPI MiS in Leipzig.
+              I am working on the thesis as a visiting researcher at the Max Planck Institute for Mathematics
+              in the Sciences in Leipzig.
             </p>
           </article>
 
@@ -98,28 +98,27 @@ const description =
     <section class="section" id="interests" aria-labelledby="interests-title">
       <div class="section__label" aria-hidden="true">02 / Interests</div>
       <div class="section__content">
-        <h2 id="interests-title">Questions I keep coming back to</h2>
+        <h2 id="interests-title">What I’m interested in</h2>
         <p class="section__lead">
-          The common thread is structure and explanation: how relationships and temporal patterns can be
-          represented, what models extract from them, and where learned methods genuinely improve on strong
-          classical approaches.
+          Most of my work involves structured data. I want to understand how relationships and temporal
+          patterns can be represented, and what models can learn from them.
         </p>
 
         <ul class="threads">
           <li>
-            <span class="threads__title">Relations</span>
-            <span>Graphs, relational representations, and the geometry hidden in connections.</span>
+            <span class="threads__title">Graphs and geometry</span>
+            <span>Graph representations, rigid structures, and geometric deep learning.</span>
           </li>
           <li>
-            <span class="threads__title">Dynamics</span>
-            <span>Time series, streaming data, and systems that change over time.</span>
+            <span class="threads__title">Time series</span>
+            <span>Temporal and streaming data, including anomaly detection.</span>
           </li>
           <li>
-            <span class="threads__title">Learning</span>
-            <span>Machine learning for structured problems, often together with classical algorithms.</span>
+            <span class="threads__title">Machine learning</span>
+            <span>Learning for structured problems and hybrid methods with classical solvers.</span>
           </li>
           <li>
-            <span class="threads__title">Understanding</span>
+            <span class="threads__title">Model understanding</span>
             <span>Why a model works, what it has learned, and when it fails.</span>
           </li>
         </ul>
@@ -129,26 +128,26 @@ const description =
     <section class="section" aria-labelledby="direction-title">
       <div class="section__label" aria-hidden="true">03 / This site</div>
       <div class="section__content">
-        <h2 id="direction-title">Still taking shape</h2>
+        <h2 id="direction-title">This site is still in progress</h2>
         <p class="section__lead">
-          I want this to become a useful record of the things I’m learning and building—not a polished list
-          of claims. The next pieces will appear as they become worth sharing.
+          I want to use it to document my work properly, with enough context to understand the problem, the
+          method, and the parts that did not work.
         </p>
 
         <ul class="roadmap">
           <li>
-            <span class="roadmap__title">Project pages</span>
-            <span>Code, results, dead ends, and enough context to make them useful.</span>
+            <span class="roadmap__title">Projects</span>
+            <span>Longer pages for selected work.</span>
             <span class="roadmap__status">In progress</span>
           </li>
           <li>
             <span class="roadmap__title">Notes</span>
-            <span>Working notes on graphs, time series, geometry, and model behaviour.</span>
+            <span>Short notes on topics I am learning or using.</span>
             <span class="roadmap__status">In progress</span>
           </li>
           <li>
-            <span class="roadmap__title">Experiments</span>
-            <span>Small interactive demos tied to questions I’m actually working on.</span>
+            <span class="roadmap__title">Interactive examples</span>
+            <span>Small demos where they help explain something.</span>
             <span class="roadmap__status">In progress</span>
           </li>
         </ul>

@@ -262,6 +262,10 @@ h1 {
   border-bottom: 1px solid rgba(238, 242, 233, 0.15);
 }
 
+.sketch__math {
+  flex-shrink: 0;
+}
+
 .sketch__footer {
   border-top: 1px solid rgba(238, 242, 233, 0.15);
 }
@@ -292,7 +296,7 @@ h1 {
   flex: 1;
   align-items: center;
   gap: 0.7rem;
-  max-width: 14.5rem;
+  max-width: 18rem;
 }
 
 .sketch__mode input {
