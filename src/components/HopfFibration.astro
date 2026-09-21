@@ -6,7 +6,7 @@
   <canvas class="sketch__canvas" aria-hidden="true"></canvas>
   <div class="sketch__footer">
     <span>Linked circles in ℝ³</span>
-    <span class="sketch__hint">Move to rotate</span>
+    <span class="sketch__hint">Drag to rotate</span>
   </div>
 </div>
 
@@ -46,9 +46,13 @@
     let animationFrame = 0;
     let yaw = -1.18;
     let pitch = -0.46;
-    let targetYaw = yaw;
-    let targetPitch = pitch;
-    let pointerActive = false;
+    let velocityYaw = 0;
+    let velocityPitch = 0;
+    let hoverX = 0;
+    let hoverY = 0;
+    let lastPointerX = 0;
+    let lastPointerY = 0;
+    let isDragging = false;
 
     const hopfPoint = (fiber: number, step: number): Point3 => {
       const delta = (fiber / fiberCount) * tau;
@@ -111,13 +115,13 @@
     const draw = () => {
       const time = frame / 60;
 
-      if (!pointerActive && !reduceMotion.matches) {
-        targetYaw = -1.18 + Math.sin(time * 0.18) * 0.22;
-        targetPitch = -0.46 + Math.cos(time * 0.14) * 0.13;
+      if (!reduceMotion.matches && !isDragging) {
+        yaw += 0.0022 + hoverX * 0.0007 + velocityYaw;
+        pitch += velocityPitch;
+        pitch += (-0.46 + Math.sin(time * 0.22) * 0.1 + hoverY * 0.09 - pitch) * 0.018;
+        velocityYaw *= 0.9;
+        velocityPitch *= 0.84;
       }
-
-      yaw += (targetYaw - yaw) * 0.055;
-      pitch += (targetPitch - pitch) * 0.055;
 
       context.clearRect(0, 0, width, height);
       drawGuide();
@@ -179,23 +183,52 @@
       draw();
     };
 
+    const startDrag = (event: PointerEvent) => {
+      isDragging = true;
+      lastPointerX = event.clientX;
+      lastPointerY = event.clientY;
+      velocityYaw = 0;
+      velocityPitch = 0;
+      canvas.setPointerCapture(event.pointerId);
+      sketch.classList.add('is-dragging');
+    };
+
     const updatePointer = (event: PointerEvent) => {
       const bounds = canvas.getBoundingClientRect();
       const relativeX = (event.clientX - bounds.left) / bounds.width;
       const relativeY = (event.clientY - bounds.top) / bounds.height;
-      targetYaw = -1.18 + (relativeX - 0.5) * 2.2;
-      targetPitch = -0.46 + (relativeY - 0.5) * 1.2;
-      pointerActive = true;
+      hoverX = relativeX - 0.5;
+      hoverY = relativeY - 0.5;
+
+      if (isDragging) {
+        const deltaX = event.clientX - lastPointerX;
+        const deltaY = event.clientY - lastPointerY;
+        yaw += deltaX * 0.0085;
+        pitch = Math.max(-1.25, Math.min(1.25, pitch + deltaY * 0.0085));
+        velocityYaw = deltaX * 0.0011;
+        velocityPitch = deltaY * 0.0009;
+        lastPointerX = event.clientX;
+        lastPointerY = event.clientY;
+      }
 
       if (reduceMotion.matches) {
-        yaw = targetYaw;
-        pitch = targetPitch;
         draw();
       }
     };
 
-    const releasePointer = () => {
-      pointerActive = false;
+    const endDrag = (event: PointerEvent) => {
+      if (!isDragging) return;
+      isDragging = false;
+      if (canvas.hasPointerCapture(event.pointerId)) {
+        canvas.releasePointerCapture(event.pointerId);
+      }
+      sketch.classList.remove('is-dragging');
+    };
+
+    const leaveCanvas = () => {
+      if (isDragging) return;
+      hoverX = 0;
+      hoverY = 0;
     };
 
     const restartAnimation = () => {
@@ -203,8 +236,11 @@
       draw();
     };
 
+    canvas.addEventListener('pointerdown', startDrag);
     canvas.addEventListener('pointermove', updatePointer);
-    canvas.addEventListener('pointerleave', releasePointer);
+    canvas.addEventListener('pointerup', endDrag);
+    canvas.addEventListener('pointercancel', endDrag);
+    canvas.addEventListener('pointerleave', leaveCanvas);
     reduceMotion.addEventListener('change', restartAnimation);
 
     const observer = new ResizeObserver(resize);

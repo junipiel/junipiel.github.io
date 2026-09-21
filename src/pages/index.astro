@@ -25,11 +25,23 @@ const description =
   <main id="main">
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero__copy">
-        <h1 id="hero-title">Julian<br /><em>Pielmaier.</em></h1>
-        <p class="hero__text">
+        <h1 id="hero-title">Hi, I’m Julian.</h1>
+        <p class="hero__text hero__text--primary">
           I’m currently working on my master’s thesis at the Max Planck Institute for Mathematics in the
           Sciences in Leipzig.
         </p>
+        <p class="hero__text">
+          I’m interested in mathematics, code, and small interactive experiments that make abstract ideas
+          easier to explore.
+        </p>
+
+        <div class="wip-note">
+          <span class="wip-note__label">Work in progress</span>
+          <p>
+            This site is still taking shape. I want it to become a place for research notes, projects, and
+            interactive things I build along the way.
+          </p>
+        </div>
 
         <div class="hero__actions">
           <a class="button button--primary" href="https://github.com/junipiel" rel="me noreferrer">
@@ -47,11 +59,15 @@ const description =
     </section>
 
     <section class="section" id="current" aria-labelledby="current-title">
-      <div class="section__label" aria-hidden="true">01 / Current</div>
+      <div class="section__label" aria-hidden="true">01 / Now</div>
       <div class="section__content">
-        <h2 id="current-title">Master’s thesis</h2>
+        <h2 id="current-title">What I’m working on</h2>
 
         <div class="facts">
+          <div class="fact">
+            <span class="fact__label">Current project</span>
+            <span>Master’s thesis</span>
+          </div>
           <div class="fact">
             <span class="fact__label">Institution</span>
             <a href="https://www.mis.mpg.de/" rel="noreferrer">
@@ -70,8 +86,37 @@ const description =
       </div>
     </section>
 
+    <section class="section" aria-labelledby="direction-title">
+      <div class="section__label" aria-hidden="true">02 / This site</div>
+      <div class="section__content">
+        <h2 id="direction-title">Where this is heading</h2>
+        <p class="section__lead">
+          I’d like this page to become a small, informal record of what I’m learning and building. These are
+          the parts I plan to add next.
+        </p>
+
+        <ul class="roadmap">
+          <li>
+            <span class="roadmap__title">Research notes</span>
+            <span>Background, references, and notes related to my work.</span>
+            <span class="roadmap__status">In progress</span>
+          </li>
+          <li>
+            <span class="roadmap__title">Code & projects</span>
+            <span>Selected repositories with a little more context than a README.</span>
+            <span class="roadmap__status">In progress</span>
+          </li>
+          <li>
+            <span class="roadmap__title">Mathematical demos</span>
+            <span>Small interactive ways to explore geometric and mathematical ideas.</span>
+            <span class="roadmap__status">In progress</span>
+          </li>
+        </ul>
+      </div>
+    </section>
+
     <section class="section section--last" aria-labelledby="elsewhere-title">
-      <div class="section__label" aria-hidden="true">02 / Links</div>
+      <div class="section__label" aria-hidden="true">03 / Links</div>
       <div class="section__content">
         <h2 id="elsewhere-title">Links</h2>
         <a class="large-link" href="https://github.com/junipiel" rel="me noreferrer">
