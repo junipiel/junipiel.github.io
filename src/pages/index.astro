@@ -5,9 +5,39 @@ import ContactConfiguration from '../components/ContactConfiguration.astro';
 const year = new Date().getFullYear();
 const description =
   'Personal website of Julian Pielmaier: computer science, machine learning, graphs, time series, and current research.';
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://junipiel.com/#website',
+      url: 'https://junipiel.com/',
+      name: 'Julian Pielmaier',
+      alternateName: 'junipiel',
+    },
+    {
+      '@type': 'ProfilePage',
+      '@id': 'https://junipiel.com/#profile',
+      url: 'https://junipiel.com/',
+      name: 'Julian Pielmaier',
+      description,
+      isPartOf: { '@id': 'https://junipiel.com/#website' },
+      mainEntity: { '@id': 'https://junipiel.com/#julian-pielmaier' },
+    },
+    {
+      '@type': 'Person',
+      '@id': 'https://junipiel.com/#julian-pielmaier',
+      name: 'Julian Pielmaier',
+      alternateName: 'junipiel',
+      url: 'https://junipiel.com/',
+      sameAs: ['https://github.com/junipiel'],
+      knowsAbout: ['Machine learning', 'Graphs', 'Dynamical systems', 'Geometric deep learning'],
+    },
+  ],
+};
 ---
 
-<BaseLayout title="Julian Pielmaier | junipiel" description={description}>
+<BaseLayout title="Julian Pielmaier | junipiel" description={description} structuredData={structuredData}>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <header class="site-header">
