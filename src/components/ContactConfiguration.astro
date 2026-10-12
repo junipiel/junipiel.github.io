@@ -1,13 +1,14 @@
 <div class="sketch" data-contact-configuration>
   <div class="sketch__header">
     <span>Rigid equal-sphere cluster</span>
+    <span data-stage>Contact graph</span>
   </div>
   <canvas
     class="sketch__canvas"
-    aria-label="A contact graph and a valid realization by seven equal spheres. Drag to rotate, or use the arrow keys."
+    aria-label="A contact graph moves from a simple two-dimensional layout into three-dimensional centre coordinates before seven equal spheres appear. Drag to rotate, or use the arrow keys."
     tabindex="0"
   >
-    A contact graph and a valid realization by seven equal spheres.
+    A contact graph, its three-dimensional centre coordinates, and a valid realization by seven equal spheres.
   </canvas>
   <div class="sketch__footer sketch__footer--controls">
     <label class="sketch__mode">
@@ -40,6 +41,7 @@
   document.querySelectorAll<HTMLElement>('[data-contact-configuration]').forEach((sketch) => {
     const canvas = sketch.querySelector<HTMLCanvasElement>('canvas');
     const slider = sketch.querySelector<HTMLInputElement>('input[type="range"]');
+    const stageLabel = sketch.querySelector<HTMLElement>('[data-stage]');
     const context = canvas?.getContext('2d');
 
     if (!canvas || !slider || !context) return;
@@ -65,6 +67,18 @@
       point[2] - centroid[2],
     ]);
 
+    // A deliberately simple 2D layout of the same abstract graph. The six
+    // outer vertices form a regular hexagon and vertex 6 sits in the centre;
+    // unlike the target coordinates, this layout contains no 3D geometry.
+    const graphOrder = [0, 3, 4, 1, 2, 5];
+    const graphLayout = new Map<number, [number, number]>(
+      graphOrder.map((index, position) => {
+        const angle = -Math.PI * 0.5 + (position / graphOrder.length) * Math.PI * 2;
+        return [index, [Math.cos(angle), Math.sin(angle)]];
+      }),
+    );
+    graphLayout.set(6, [0, 0]);
+
     const contacts = points.flatMap((from, fromIndex) =>
       points.slice(fromIndex + 1).flatMap((to, offset) => {
         const toIndex = fromIndex + offset + 1;
@@ -87,18 +101,25 @@
     let hoveredSphere = -1;
     let projected: ProjectedPoint[] = [];
     let currentMix = 0;
+    let currentHitRadius = 12;
     let manualUntil = 0;
 
+    const clamp01 = (value: number) => Math.max(0, Math.min(1, value));
     const smoothStep = (value: number) => value * value * (3 - 2 * value);
+    const eased = (value: number) => smoothStep(clamp01(value));
+    const lerp = (from: number, to: number, mix: number) => from + (to - from) * mix;
 
     const automaticMix = (time: number) => {
-      const phase = ((time - startedAt) % 18000) / 18000;
+      const phase = ((time - startedAt) % 24000) / 24000;
 
-      if (phase < 0.16) return 0;
-      if (phase < 0.42) return smoothStep((phase - 0.16) / 0.26);
-      if (phase < 0.66) return 1;
-      if (phase < 0.92) return 1 - smoothStep((phase - 0.66) / 0.26);
-      return 0;
+      if (phase < 0.14) return 0;
+      if (phase < 0.32) return lerp(0, 0.64, eased((phase - 0.14) / 0.18));
+      if (phase < 0.42) return 0.64;
+      if (phase < 0.56) return lerp(0.68, 1, eased((phase - 0.42) / 0.14));
+      if (phase < 0.68) return 1;
+      if (phase < 0.8) return lerp(1, 0.68, eased((phase - 0.68) / 0.12));
+      if (phase < 0.9) return 0.64;
+      return lerp(0.62, 0, eased((phase - 0.9) / 0.1));
     };
 
     const rotate = ([x, y, z]: Point3): Point3 => {
@@ -124,7 +145,7 @@
       };
     };
 
-    const drawBackground = () => {
+    const drawBackground = (geometryMix: number) => {
       const radius = Math.min(width, height) * 0.36;
 
       context.save();
@@ -132,7 +153,7 @@
       context.rotate(-0.13);
       context.setLineDash([2, 8]);
       context.lineWidth = 1;
-      context.strokeStyle = 'rgba(238, 242, 233, 0.09)';
+      context.strokeStyle = `rgba(238, 242, 233, ${0.09 * geometryMix})`;
       context.beginPath();
       context.ellipse(0, 0, radius, radius * 0.34, 0, 0, Math.PI * 2);
       context.stroke();
@@ -158,14 +179,44 @@
       }
 
       context.clearRect(0, 0, width, height);
-      drawBackground();
 
       const scale = Math.min(width, height) * 0.145;
-      projected = points.map((point, index) => project(point, index, scale));
+      const positionMix = eased(currentMix / 0.62);
+      const sphereMix = eased((currentMix - 0.68) / 0.32);
+      drawBackground(positionMix);
+
+      const graphScale = Math.min(width, height) * 0.245;
+      const graphProjected: ProjectedPoint[] = points.map((_, index) => {
+        const [x, y] = graphLayout.get(index) ?? [0, 0];
+
+        return {
+          x: width * 0.5 + x * graphScale,
+          y: height * 0.5 + y * graphScale,
+          z: 0,
+          index,
+        };
+      });
+      const realizationProjected = points.map((point, index) => project(point, index, scale));
+      projected = realizationProjected.map((point, index) => ({
+        x: lerp(graphProjected[index].x, point.x, positionMix),
+        y: lerp(graphProjected[index].y, point.y, positionMix),
+        z: point.z * positionMix,
+        index,
+      }));
       const nodeRadius = Math.min(width, height) * 0.017;
-      // At currentMix = 1, this is the same scale used for a unit
+      // At sphereMix = 1, this is the same scale used for a unit
       // displacement in the centre coordinates above.
-      const sphereRadius = nodeRadius + (scale - nodeRadius) * currentMix;
+      const sphereRadius = lerp(nodeRadius, scale, sphereMix);
+      currentHitRadius = Math.max(12, sphereRadius);
+
+      if (stageLabel) {
+        if (positionMix < 0.03) stageLabel.textContent = 'Contact graph';
+        else if (positionMix < 0.97) stageLabel.textContent = 'Arranging centres';
+        else if (sphereMix < 0.03) stageLabel.textContent = '3D centres';
+        else if (sphereMix < 0.97) stageLabel.textContent = 'Adding spheres';
+        else stageLabel.textContent = 'Sphere realization';
+      }
+
       const sortedContacts: Contact[] = contacts
         .map((contact) => ({
           ...contact,
@@ -182,10 +233,10 @@
         context.beginPath();
         context.moveTo(from.x, from.y);
         context.lineTo(to.x, to.y);
-        context.lineWidth = active ? 2.25 : 0.9 + (1 - currentMix) * 0.8;
+        context.lineWidth = active ? 2.25 : 0.9 + (1 - sphereMix) * 0.8;
         context.strokeStyle = active
           ? 'rgba(239, 128, 101, 0.92)'
-          : `rgba(238, 242, 233, ${0.08 + (1 - currentMix) * 0.62})`;
+          : `rgba(238, 242, 233, ${0.08 + (1 - sphereMix) * 0.62})`;
         context.stroke();
       });
 
@@ -208,10 +259,13 @@
             gradient.addColorStop(0, '#ffd9ca');
             gradient.addColorStop(0.58, '#ef8065');
             gradient.addColorStop(1, '#9b3d2c');
-          } else {
+          } else if (sphereMix > 0.02) {
             gradient.addColorStop(0, '#ffffff');
             gradient.addColorStop(0.52, '#e4eee6');
             gradient.addColorStop(1, '#8ba397');
+          } else {
+            gradient.addColorStop(0, '#e4eee6');
+            gradient.addColorStop(1, '#b5c8bd');
           }
 
           context.beginPath();
@@ -241,11 +295,7 @@
     const sphereAt = (x: number, y: number) =>
       [...projected]
         .sort((a, b) => b.z - a.z)
-        .find(
-          (point) =>
-            Math.hypot(x - point.x, y - point.y) <=
-            Math.max(12, Math.min(width, height) * 0.145 * currentMix),
-        )?.index ?? -1;
+        .find((point) => Math.hypot(x - point.x, y - point.y) <= currentHitRadius)?.index ?? -1;
 
     const startDrag = (event: PointerEvent) => {
       isDragging = true;
