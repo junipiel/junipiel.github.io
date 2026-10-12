@@ -68,8 +68,9 @@
     ]);
 
     // A deliberately simple 2D layout of the same abstract graph. The six
-    // outer vertices form a regular hexagon and vertex 6 sits in the centre;
-    // unlike the target coordinates, this layout contains no 3D geometry.
+    // outer vertices form a regular hexagon and vertex 6 sits near its centre;
+    // the small offset keeps a non-incident edge from disappearing behind it.
+    // Unlike the target coordinates, this layout contains no 3D geometry.
     const graphOrder = [0, 3, 4, 1, 2, 5];
     const graphLayout = new Map<number, [number, number]>(
       graphOrder.map((index, position) => {
@@ -77,7 +78,7 @@
         return [index, [Math.cos(angle), Math.sin(angle)]];
       }),
     );
-    graphLayout.set(6, [0, 0]);
+    graphLayout.set(6, [0.2, -0.12]);
 
     const contacts = points.flatMap((from, fromIndex) =>
       points.slice(fromIndex + 1).flatMap((to, offset) => {
